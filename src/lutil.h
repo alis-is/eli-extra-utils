@@ -10,4 +10,5 @@ int push_result(lua_State *L, int res, const char *info);
 #include <ctype.h>
 #include <windows.h>
 int windows_pusherror(lua_State *L, DWORD error, int nresults);
+#define windows_pushlasterror(L) windows_pusherror(L, GetLastError(), -2)
 #endif
