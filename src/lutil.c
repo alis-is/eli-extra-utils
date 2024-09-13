@@ -112,6 +112,33 @@ int windows_pusherror(lua_State *L, DWORD error, int nresults)
 }
 #endif
 
+int get_sleep_divider_from_stack(lua_State *L, int pos, int def)
+{
+	switch (lua_type(L, 2)) {
+	case LUA_TNUMBER:
+		int divider = (int)luaL_checknumber(L, 2);
+		if (divider <= 0) {
+			return luaL_error(L, "Invalid divider specified");
+		}
+		return divider;
+	case LUA_TSTRING: {
+		const char *unit = lua_tostring(L, 2);
+		if (strcmp(unit, "s") == 0) {
+			return 1;
+		} else if (strcmp(unit, "ms") == 0) {
+			return 1000;
+		} else {
+			return luaL_error(L, "Invalid unit specified");
+		}
+		break;
+	}
+	case LUA_TNIL:
+		return def;
+	default:
+		return luaL_error(L, "Invalid second parameter type");
+	}
+}
+
 void sleep_for_fraction(int seconds, int divider)
 {
 	// Calculate the sleep time in milliseconds

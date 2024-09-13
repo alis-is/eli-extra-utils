@@ -18,6 +18,7 @@ int windows_pusherror(lua_State *L, DWORD error, int nresults);
 #define windows_pushlasterror(L) windows_pusherror(L, GetLastError(), -2)
 #endif
 
+int get_sleep_divider_from_stack(lua_State *L, int pos, int def);
 void sleep_for_fraction(int seconds, int divider);
 
 #endif
