@@ -112,50 +112,50 @@ int windows_pusherror(lua_State *L, DWORD error, int nresults)
 }
 #endif
 
-int get_sleep_divider_from_stack(lua_State *L, int pos, int def)
+int get_sleep_divider_from_state(lua_State *L, int pos, int def)
 {
-	switch (lua_type(L, 2)) {
-	case LUA_TNUMBER:
-		int divider = (int)luaL_checknumber(L, 2);
-		if (divider <= 0) {
-			return luaL_error(L, "Invalid divider specified");
+	switch (lua_type(L, pos)) {
+	case LUA_TNUMBER: {
+		int divider = (int)luaL_checknumber(L, pos);
+		if (divider <= 0 ||
+		    divider > 1000) { // we dont allow less than 1 ms
+			return luaL_error(L, "has to be > 0 and <= 1000");
 		}
 		return divider;
+	}
 	case LUA_TSTRING: {
-		const char *unit = lua_tostring(L, 2);
+		const char *unit = lua_tostring(L, pos);
 		if (strcmp(unit, "s") == 0) {
 			return 1;
 		} else if (strcmp(unit, "ms") == 0) {
 			return 1000;
 		} else {
-			return luaL_error(L, "Invalid unit specified");
+			return luaL_argerror(L, pos,
+					     "number, 's' or 'ms' expected");
 		}
 		break;
 	}
 	case LUA_TNIL:
+	case LUA_TNONE:
 		return def;
 	default:
-		return luaL_error(L, "Invalid second parameter type");
+		return luaL_argerror(L, pos, "number, 's' or 'ms' expected");
 	}
 }
 
-void sleep_for_fraction(int seconds, int divider)
+int sleep_duration_to_ms(int duration, int divider)
 {
-	// Calculate the sleep time in milliseconds
-	int sleep_time_in_milliseconds = (seconds * 1000) / divider;
+	return duration * 1000 / divider;
+}
 
+void sleep_ms(int ms)
+{
 #ifdef _WIN32
-	// Windows Sleep function takes time in milliseconds
-	Sleep((DWORD)sleep_time_in_milliseconds); // Sleep in milliseconds
+	Sleep(ms);
 #else
 	struct timespec ts;
-
-	// Convert milliseconds to seconds and nanoseconds for nanosleep()
-	ts.tv_sec = sleep_time_in_milliseconds / 1000; // Whole seconds
-	ts.tv_nsec = (sleep_time_in_milliseconds % 1000) *
-		     1000000L; // Remaining milliseconds to nanoseconds
-
-	// Sleep using nanosleep
+	ts.tv_sec = ms / 1000;
+	ts.tv_nsec = (ms % 1000) * 1000000L;
 	nanosleep(&ts, NULL);
 #endif
 }
