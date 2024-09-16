@@ -6,16 +6,13 @@
 #include "lua.h"
 #include "lutil.h"
 
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN 1
-#define NOGDI 1
 #include <ctype.h>
 #include <windows.h>
-#else
-#include <time.h>
 #endif
 
 int push_error_string(lua_State *L, const char *info)
@@ -158,4 +155,14 @@ void sleep_ms(int ms)
 	ts.tv_nsec = (ms % 1000) * 1000000L;
 	nanosleep(&ts, NULL);
 #endif
+}
+
+long long get_time_in_ms() {
+	struct timespec ts;
+    timespec_get(&ts, TIME_UTC);
+
+    // Convert seconds to milliseconds and add the nanoseconds converted to milliseconds
+    long long time_in_ms = (ts.tv_sec * 1000LL) + (ts.tv_nsec / 1000000LL);
+
+    return time_in_ms;
 }

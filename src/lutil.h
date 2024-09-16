@@ -2,6 +2,7 @@
 #define ELI_EXTRA_UTILS_H__
 
 #include <stdio.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "lua.h"
@@ -21,5 +22,6 @@ int windows_pusherror(lua_State *L, DWORD error, int nresults);
 int get_sleep_divider_from_state(lua_State *L, int pos, int def);
 int sleep_duration_to_ms(int duration, int divider);
 void sleep_ms(int ms);
+int64_t get_time_in_ms();
 
 #endif
