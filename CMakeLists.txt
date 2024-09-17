@@ -1,4 +1,4 @@
-project (eli_extra_utils)
+project(eli_extra_utils)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED True)
@@ -9,3 +9,4 @@ set(eli_extra_utils ${eli_extra_utils_sources})
 
 add_library(eli_extra_utils ${eli_extra_utils})
 target_link_libraries(eli_extra_utils)
+target_compile_definitions(eli_extra_utils PRIVATE _POSIX_C_SOURCE=199309L)

@@ -13,8 +13,6 @@
 #ifdef _WIN32
 #include <ctype.h>
 #include <windows.h>
-#else
-#define _POSIX_C_SOURCE 199309L
 #endif
 
 int push_error_string(lua_State *L, const char *info)
