@@ -13,6 +13,8 @@
 #ifdef _WIN32
 #include <ctype.h>
 #include <windows.h>
+#else
+#include <threads.h>
 #endif
 
 int push_error_string(lua_State *L, const char *info)
@@ -150,10 +152,7 @@ void sleep_ms(int ms)
 #ifdef _WIN32
 	Sleep(ms);
 #else
-	struct timespec ts;
-	ts.tv_sec = ms / 1000;
-	ts.tv_nsec = (ms % 1000) * 1000000L;
-	nanosleep(&ts, NULL);
+	thrd_sleep(&(struct timespec){ .tv_sec = ms / 1000, .tv_nsec = (ms % 1000) * 1000000L }, NULL);
 #endif
 }
 
