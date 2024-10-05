@@ -44,11 +44,11 @@ int sleep_duration_to_ms(int duration, int divider)
 	return duration * 1000 / divider;
 }
 
-void sleep_ms(int ms)
+int sleep_ms(int ms)
 {
 	struct timespec ts = { .tv_sec = ms / 1000,
 			       .tv_nsec = (ms % 1000) * 1000000L };
-	thrd_sleep(&ts, NULL);
+	return thrd_sleep(&ts, NULL);
 }
 
 long long get_time_in_ms()
