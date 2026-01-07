@@ -8,13 +8,13 @@
 #include <threads.h>
 #endif
 
-int get_sleep_divider_from_state(lua_State *L, int pos, int def)
+double get_ms_divider_from_state(lua_State *L, int pos, double def)
 {
 	switch (lua_type(L, pos)) {
 	case LUA_TNUMBER: {
 		int divider = (int)luaL_checknumber(L, pos);
 		if (divider <= 0 ||
-		    divider > 1000) { // we dont allow less than 1 ms
+		    divider > 1000) { // we dont allow less than 1 us
 			return luaL_error(L, "has to be > 0 and <= 1000");
 		}
 		return divider;
@@ -22,9 +22,11 @@ int get_sleep_divider_from_state(lua_State *L, int pos, int def)
 	case LUA_TSTRING: {
 		const char *unit = lua_tostring(L, pos);
 		if (strcmp(unit, "s") == 0) {
-			return 1;
+			return 0.001;
 		} else if (strcmp(unit, "ms") == 0) {
-			return 1000;
+			return 1.0;
+		} else if (strcmp(unit, "us") == 0) {
+			return 1000.0;
 		} else {
 			return luaL_argerror(L, pos,
 					     "number, 's' or 'ms' expected");
@@ -39,16 +41,24 @@ int get_sleep_divider_from_state(lua_State *L, int pos, int def)
 	}
 }
 
-int sleep_duration_to_ms(int duration, int divider)
+int sleep_seconds(double seconds)
 {
-	return duration * 1000 / divider;
+	if (seconds < 0)
+		seconds = 0;
+
+	time_t sec = (time_t)(seconds);
+
+	double remainder_s = seconds - ((double)sec);
+	long nsec = (long)(remainder_s * 1000000000.0);
+
+	struct timespec ts = { .tv_sec = sec, .tv_nsec = nsec };
+
+	return thrd_sleep(&ts, NULL);
 }
 
-int sleep_ms(int ms)
+int sleep_ms(double milliseconds)
 {
-	struct timespec ts = { .tv_sec = ms / 1000,
-			       .tv_nsec = (ms % 1000) * 1000000L };
-	return thrd_sleep(&ts, NULL);
+	return sleep_seconds(milliseconds / 1000.0);
 }
 
 long long get_time_in_ms()
